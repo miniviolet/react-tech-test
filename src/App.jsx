@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import Summary from './components/Summary'
 import './App.css'
 import FullCocktail from './components/FullCocktail'
 import List from './components/List'
@@ -8,24 +7,31 @@ function App() {
   const [isShowFull, setIsShowFull] = useState(false)
   const [cocktailList, setCocktailList] = useState(null)
   const [currentCocktail, setCurrentCocktail] = useState(null)
+  const [maxCocktails, setMaxCocktails] = useState(10)
+  const [showLoadBtn, setShowLoadBtn] = useState(true)
+
+  const getCocktails = async() => {
+    fetch("https://www.thecocktaildb.com/api/json/v1/1/search.php?s=a")
+      .then(response => response.json())
+      .then((data) => {
+          setCocktailList(data.drinks.slice(0, maxCocktails));
+          if (data.drinks.length < maxCocktails) setShowLoadBtn(false)
+      })
+      .catch((error) => {
+          console.log(error);
+          return null;
+      });
+  };
 
   useEffect(() => {
-    async function getCocktails() {
-      fetch("https://www.thecocktaildb.com/api/json/v1/1/search.php?s=a")
-        .then(response => response.json())
-        .then((data) => {
-            setCocktailList(data.drinks.slice(0,10));
-        })
-        .catch((error) => {
-            console.log(error);
-            return null;
-        });
-    };
-    
     if(!cocktailList || cocktailList.length === 0) {
       getCocktails()
     }
   }, [])
+
+  useEffect(() => {
+    getCocktails()
+  }, [maxCocktails])
 
   const setCocktail = (id) => {
     if(!id) return;
@@ -40,6 +46,7 @@ function App() {
       {isShowFull ? 
         <FullCocktail {...{...currentCocktail, setIsShowFull}} /> : 
         <List {...{cocktailList, setCocktail}} />}
+      {showLoadBtn && !isShowFull ? <button className='loadBtn' onClick={() => setMaxCocktails(maxCocktails + 10)}>Load more...</button> : null}
     </>
   )
 }

@@ -2,7 +2,6 @@ import './../App.css'
 import Summary from './Summary'
 
 function List({cocktailList, setCocktail}) {
-
   return (
     <>
         <h2>Cocktail list</h2>
